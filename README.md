@@ -1,3 +1,9 @@
+## Changelog 22.11.2020
+
+Add support for changing Hostname.
+'''init_gui(app, port=5000, width=1024, height=768,
+             window_title="Some nice title", adress="0.0.0.0", argv=None)'''
+
 ## PyFladesk
 
 Create desktop application by using Flask and QtWebEngine.
