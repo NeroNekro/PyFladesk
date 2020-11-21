@@ -1,19 +1,21 @@
 import sys
 from PyQt5 import QtCore, QtWidgets, QtGui, QtWebEngineWidgets
 import socket
+import time
 
 
 class ApplicationThread(QtCore.QThread):
-    def __init__(self, application, port=5000):
+    def __init__(self, application, adress, port=5000):
         super(ApplicationThread, self).__init__()
         self.application = application
         self.port = port
+        self.adress = adress
 
     def __del__(self):
         self.wait()
 
     def run(self):
-        self.application.run(port=self.port, threaded=True)
+        self.application.run(host= self.adress,port=self.port, threaded=True)
 
 
 class WebPage(QtWebEngineWidgets.QWebEnginePage):
@@ -35,22 +37,22 @@ class WebPage(QtWebEngineWidgets.QWebEnginePage):
 
 
 def init_gui(application, port=0, width=800, height=600,
-             window_title="PyFladesk", icon="appicon.png", argv=None):
+             window_title="PyFladesk", icon="appicon.png", adress="localhost", argv=None):
     if argv is None:
         argv = sys.argv
 
     if port == 0:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.bind(('localhost', 0))
+        sock.bind((adress, 0))
         port = sock.getsockname()[1]
         sock.close()
 
     # Application Level
     qtapp = QtWidgets.QApplication(argv)
-    webapp = ApplicationThread(application, port)
+    webapp = ApplicationThread(application, adress, port)
     webapp.start()
     qtapp.aboutToQuit.connect(webapp.terminate)
-
+    time.sleep(1)
     # Main Window Level
     window = QtWidgets.QMainWindow()
     window.resize(width, height)
@@ -62,7 +64,7 @@ def init_gui(application, port=0, width=800, height=600,
     window.setCentralWidget(webView)
 
     # WebPage Level
-    page = WebPage('http://localhost:{}'.format(port))
+    page = WebPage('http://' + adress + ':{}'.format(port))
     page.home()
     webView.setPage(page)
 
